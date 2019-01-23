@@ -1,35 +1,45 @@
 ﻿using EF_V0.DataBase.Core.Domain;
-using EF_V0.DataBase.Core.Interfaces;
+using EF_V0.DataBase.Persistence.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace EF_V0.DataBase.Persistence.Repositories
 {
-	public class UserRepo : Repo<User>, IUser
+	public class UserRepo : Repo<UserDb>, IUser
 	{
-		private new ApiContext context;
+		private readonly new ApiContext context;
 		public UserRepo(ApiContext context) : base(context)
 		{
 			this.context = context;
 		}
 
-		public User FindByEmail(string email)
+		public UserDb FindByEmail(string email)
 		{
 			return context.User
 				.Where(u => u.Email.ToLower() == email.ToLower())
 				.Include(u => u.UserRole)
 				.ThenInclude(r => r.Role)
-				.SingleOrDefault<User>();
+				.SingleOrDefault();
 		}
 
-		public Role[] GetRoles(User user)
+		public UserRoleDb[] GetRoles(UserDb user)
 		{
-			
-			return user.UserRole.Select(r => r.Role).ToArray();
+			return context.UserRole
+				.Where(ur => ur.UserId == user.Id)
+				.Include(r => r.Role)
+				.ToArray();
 		}
+
+		public void UpdateLastLogin(int userId)
+		{
+			var user = context.User.SingleOrDefault(u => u.Id == userId);
+			user.LastLoginAt = DateTime.Now;
+			context.User.Update(user);
+		}
+
+
 
 	}
 }

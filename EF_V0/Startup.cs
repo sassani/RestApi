@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-using EF_V0.DataBase;
-using EF_V0.DataBase.Core;
+﻿using EF_V0.Core.Services;
+using EF_V0.Core.Services.Interfaces;
 using EF_V0.DataBase.Persistence;
 using EF_V0.Extensions;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EF_V0
 {
@@ -24,9 +23,22 @@ namespace EF_V0
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.ConfigureDb(Configuration);
-			services.ConfigureCors(Configuration);
+			services.AddOptions();
+
+			var appSettingSection = Configuration.GetSection("AppSettings");
+			services.Configure<AppSettings>(appSettingSection);
+			AppSettings appSettings = appSettingSection.Get<AppSettings>();
+			
+
+			services.ConfigureDb(appSettings);
+			services.ConfigureCors(appSettings);
+			services.ConfigureAuthentication(appSettings);
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+			services.AddHttpContextAccessor();
+
+
+			services.AddTransient<ITokenService, TokenService>();
+			services.AddTransient<IAuthService, AuthService>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,8 +63,10 @@ namespace EF_V0
 			{
 				app.UseHsts();
 			}
+
 			app.UseCors("CorsPolicy");
 			app.UseHttpsRedirection();
+			app.UseAuthentication();
 			app.UseMvc();
 		}
 	}

@@ -9,7 +9,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace EF_V0.Core.Models.Responses
+namespace EF_V0.Controllers.Responses
 {
 	public class Response
 	{

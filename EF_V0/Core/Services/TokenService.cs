@@ -1,39 +1,63 @@
 ﻿using Castle.Core.Configuration;
 using EF_V0.Core.Helpers;
-using EF_V0.Core.Models;
-using EF_V0.Core.Models.Responses;
+using EF_V0.Core.Entities;
+using EF_V0.Core.Entities.DTOs;
+using EF_V0.Core.Services.Interfaces;
+using EF_V0.Extensions;
+using Jose;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace EF_V0.Core.Services
 {
-	public class TokenService
+	public class TokenService : ITokenService
 	{
-		public IConfiguration Configuration { get; }
-		private 
-		TokenService(IConfiguration configuration)
+		private readonly IOptions<AppSettings> config;
+		private readonly byte[] secretKey;
+		public TokenService(IOptions<AppSettings> config)
 		{
-			Configuration = configuration;
+			this.config = config;
+			secretKey = config.Value.Token.SecretKey.Select(x => (byte)x).ToArray();
 		}
 
-		public string GenerateToken(User user)
+		public AuthTokenDto GenerateAuthToken(User user)
 		{
-			RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-			var privateKey = new X509Certificate2("my-key.p12", "password", X509KeyStorageFlags.Exportable | X509KeyStorageFlags.MachineKeySet).PrivateKey as RSACryptoServiceProvider;
-			string refreshToken = GenerateRefreshToken(user.PublicId);
-			AccessToken accessTokenPayload = new AccessToken(user.PublicId, user.Roles);
-			string accessToken = Jose.JWT.Encode(accessTokenPayload, rsa, Jose.JwsAlgorithm.RS256);
-			return "This is token!";
+			AccessTokenDto accessToken = new AccessTokenDto(user);
+			string signedAccessToken = JWT.Encode(accessToken, secretKey, JwsAlgorithm.HS256);
+			string refreshToken = user.RefreshToken;
+			if (user.RefreshToken.Equals(""))
+			{
+			refreshToken = GenerateRefreshToken(user.PublicId);
+			}
+			AuthTokenDto authToken = new AuthTokenDto(signedAccessToken, refreshToken, "bearer", user);
+
+			return authToken;
 		}
 
-		public bool ValidateToken(string token)
+		public AuthTokenDto GenerateAuthToken(User user, string refreshToken)
 		{
+			AccessTokenDto accessToken = new AccessTokenDto(user);
+			string signedAccessToken = JWT.Encode(accessToken, secretKey, JwsAlgorithm.HS256);
+			AuthTokenDto authToken = new AuthTokenDto(signedAccessToken, refreshToken, "bearer", user);
+
+			return authToken;
+		}
+
+		public bool ValidateToken(string accessToken)
+		{
+			string tokenString = accessToken.Split(' ')[1];
+			var temp = JWT.Decode<AccessTokenDto>(tokenString,secretKey);
 			return true;
 		}
 
 		private string GenerateRefreshToken(string userPublicId)
 		{
-			return StringHelper.StringToHash(userPublicId + StringHelper.GenerateRandom(25));
+			return userPublicId + StringHelper.GenerateRandom(37);
+			//return StringHelper.StringToHash(userPublicId + StringHelper.GenerateRandom(25));
 		}
 	}
 }

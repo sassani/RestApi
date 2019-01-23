@@ -1,28 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿
+using EF_V0.Controllers.Responses;
+using EF_V0.Core.Entities;
+using EF_V0.DataBase.Core;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using EF_V0.Core.Models.Responses;
 
 namespace EF_V0.Controllers
 {
 	public class BaseController : Controller
 	{
-		//protected int GetUserId()
-		//{
-		//	if (int.TryParse(User.FindFirst("uid")?.Value, out int id))
-		//		return id;
-		//	else
-		//		return 0;
-		//}
-		//protected User GetUser()
-		//{
-		//	var unitOfWork = HttpContext.RequestServices.GetService<IUnitOfWork>();
+		protected readonly IUnitOfWork unitOfWork;
+		protected readonly IHttpContextAccessor httpContextAccessor;
 
-		//	return unitOfWork.Users.Where(table => table.Id == GetUserId()).FirstOrDefault();
-		//}
+		protected BaseController(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+		{
+			this.unitOfWork = unitOfWork;
+			this.httpContextAccessor = httpContextAccessor;
+		}
+
+		protected int GetUserId()
+		{
+			if (int.TryParse(User.FindFirst("uid")?.Value, out int id))
+				return id;
+			else
+				return 0;
+		}
+
+		protected User GetUser()
+		{
+			User user = new User(unitOfWork);
+			user.GetUser(GetUserId());
+			return user;
+		}
 
 		protected IActionResult MakeResponse(System.Net.HttpStatusCode statusCode, object payload = null)
 		{

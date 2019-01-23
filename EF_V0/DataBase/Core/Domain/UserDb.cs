@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace EF_V0.DataBase.Core.Domain
 {
-	public class User
+	public class UserDb
 	{
-		public User()
+		public UserDb()
 		{
-			UserRole = new HashSet<UserRole>();
+			UserRole = new HashSet<UserRoleDb>();
 		}
 		public int Id { get; set; }
 		public string PublicId { get; set; }
@@ -21,6 +21,7 @@ namespace EF_V0.DataBase.Core.Domain
 		public bool IsActive { get; set; }
 		public DateTime? LastLoginAt { get; set; }
 
-		public virtual ICollection<UserRole> UserRole { get; set; }
+		public virtual ICollection<UserRoleDb> UserRole { get; set; }
+		public virtual ICollection<UserClientDb> UserClient { get; set; }
 	}
 }

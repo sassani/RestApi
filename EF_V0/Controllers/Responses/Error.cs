@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace EF_V0.Core.Models.Responses
+namespace EF_V0.Controllers.Responses
 {
 	public class Error
 	{

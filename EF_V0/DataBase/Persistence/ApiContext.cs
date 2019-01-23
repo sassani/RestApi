@@ -10,16 +10,29 @@ namespace EF_V0.DataBase.Persistence
 			: base(options)
 		{ }
 
-		public DbSet<User> User { get; set; }
-		public DbSet<Role> Role { get; set; }
-		public DbSet<UserRole> UserRole { get; set; }
+		public DbSet<ClientDb> Client { get; set; }
+		public DbSet<UserDb> User { get; set; }
+		public DbSet<RoleDb> Role { get; set; }
+		public DbSet<UserClientDb> UserClient { get; set; }
+		public DbSet<UserRoleDb> UserRole { get; set; }
 
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			// Database seeding
+			#region Client
+			modelBuilder.Entity<ClientDb>().HasData(new ClientDb
+			{
+				Id = 1,
+				ClientPublicId = "GXgxzau9",
+				ClientSecret = "GXgxzau9GXgxzau9",
+				Name = "localhost",
+				Type = EF_V0.Core.AppEnums.ClientType.Web
+			});
+			#endregion
+
 			#region User
-			modelBuilder.Entity<User>().HasData(new User
+			modelBuilder.Entity<UserDb>().HasData(new UserDb
 			{
 				Id = 1,
 				PublicId = "fsreytvgvcygec764cyygg",
@@ -31,7 +44,7 @@ namespace EF_V0.DataBase.Persistence
 				IsEmailVerified = true,
 				LastLoginAt = DateTime.Now
 			});
-			modelBuilder.Entity<User>().HasData(new User
+			modelBuilder.Entity<UserDb>().HasData(new UserDb
 			{
 				Id = 2,
 				PublicId = "gvhfrtsrtdf2gugjh4jhvjh6uhv",
@@ -46,22 +59,22 @@ namespace EF_V0.DataBase.Persistence
 			#endregion
 
 			#region Role
-			modelBuilder.Entity<Role>().HasData(new Role
+			modelBuilder.Entity<RoleDb>().HasData(new RoleDb
 			{
 				Id = 1,
 				Name = "super_admin",
 			});
-			modelBuilder.Entity<Role>().HasData(new Role
+			modelBuilder.Entity<RoleDb>().HasData(new RoleDb
 			{
 				Id = 2,
 				Name = "admin",
 			});
-			modelBuilder.Entity<Role>().HasData(new Role
+			modelBuilder.Entity<RoleDb>().HasData(new RoleDb
 			{
 				Id = 3,
 				Name = "reader",
 			});
-			modelBuilder.Entity<Role>().HasData(new Role
+			modelBuilder.Entity<RoleDb>().HasData(new RoleDb
 			{
 				Id = 4,
 				Name = "writer",
@@ -69,25 +82,26 @@ namespace EF_V0.DataBase.Persistence
 			#endregion
 
 			#region UserRole
-			modelBuilder.Entity<UserRole>().HasData(new UserRole
+			modelBuilder.Entity<UserRoleDb>().HasData(new UserRoleDb
 			{
 				Id = 1,
 				UserId = 1,
 				RoleId = 1
 			});
-			modelBuilder.Entity<UserRole>().HasData(new UserRole
+			modelBuilder.Entity<UserRoleDb>().HasData(new UserRoleDb
 			{
 				Id = 2,
 				UserId = 1,
 				RoleId = 2
 			});
-			modelBuilder.Entity<UserRole>().HasData(new UserRole
+			modelBuilder.Entity<UserRoleDb>().HasData(new UserRoleDb
 			{
 				Id = 3,
 				UserId = 2,
 				RoleId = 1
 			});
 			#endregion
+
 		}
 
 	}

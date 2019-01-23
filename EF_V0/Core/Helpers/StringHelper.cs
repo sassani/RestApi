@@ -72,15 +72,15 @@ namespace EF_V0.Core.Helpers
 
 		private static string GenerateHashedString(string plainText, string salt, int cost = 10)
 		{
-			byte[] password = Encoding.UTF8.GetBytes(salt + "$" + plainText);
+			byte[] encodedText = Encoding.UTF8.GetBytes(salt + "$" + plainText);
 
 			using (HashAlgorithm sha256 = new SHA256Managed())
 			{
 				for (int i = 0; i <= cost; i++)
-					password = sha256.ComputeHash(password);
+					encodedText = sha256.ComputeHash(encodedText);
 			}
 
-			return $"$5${cost}${salt}$" + Convert.ToBase64String(password);
+			return $"$5${cost}${salt}$" + Convert.ToBase64String(encodedText);
 		}
 		#endregion
 	}

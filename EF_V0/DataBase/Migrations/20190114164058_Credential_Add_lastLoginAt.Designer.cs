@@ -21,7 +21,7 @@ namespace EF_V0.DataBase.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("EF_V0.Core.Models.Credential", b =>
+            modelBuilder.Entity("EF_V0.Core.Entities.Credential", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

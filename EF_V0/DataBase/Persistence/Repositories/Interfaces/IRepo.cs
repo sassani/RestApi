@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace EF_V0.DataBase.Core.Interfaces
+namespace EF_V0.DataBase.Persistence.Repositories.Interfaces
 {
 	public interface IRepo<TEntity> where TEntity : class
 	{

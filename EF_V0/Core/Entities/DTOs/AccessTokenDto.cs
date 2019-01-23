@@ -1,16 +1,14 @@
 ﻿using EF_V0.Core.Helpers;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
-namespace EF_V0.Core.Models.Responses
+namespace EF_V0.Core.Entities.DTOs
 {
-	public class AccessToken
+	public class AccessTokenDto
 	{
 		[JsonProperty(propertyName: "uid")]
-		public string UserId { get; set; }
+		public int UserId { get; set; }
 
 		[JsonProperty(propertyName: "aid")]
 		public int UserApplicationId { get; set; }
@@ -19,13 +17,15 @@ namespace EF_V0.Core.Models.Responses
 		public long Expiration { get; set; }
 
 		[JsonProperty(propertyName: "roles")]
-		public HashSet<string> Roles { get; set; }
+		public string[] Roles { get; set; }
 
-		public AccessToken(string userId,  HashSet<string> roles, int userApplicationId=1)
+		public AccessTokenDto() { }
+
+		public AccessTokenDto(User user, int userApplicationId=1)
 		{
-			UserId = userId;
+			UserId = user.Id;
 			UserApplicationId = userApplicationId;
-			Roles = roles;
+			Roles = user.Roles.ToArray();
 			Expiration = DateTimeHelper.GetUnixTimestamp(DateTime.Now.AddMinutes(50));
 		}
 	}

@@ -1,4 +1,5 @@
-﻿using EF_V0.Core.Models;
+﻿using EF_V0.Core.Entities;
+using EF_V0.Core.Entities.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace EF_V0.Core.Services.Interfaces
 {
 	public interface IAuthService
 	{
-		string GenerateToken(User user);
-		bool ValidateToken(string TokenString);
+		bool Authenticate(LoginUserDto loginUser, ref User user);
+		void Login(Client client, User user, string refreshToken);
 	}
 }

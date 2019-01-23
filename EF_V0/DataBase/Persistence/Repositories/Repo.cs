@@ -1,4 +1,4 @@
-﻿using EF_V0.DataBase.Core.Interfaces;
+﻿using EF_V0.DataBase.Persistence.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
