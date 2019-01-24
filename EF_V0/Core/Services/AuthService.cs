@@ -4,16 +4,21 @@ using EF_V0.Core.Helpers;
 using EF_V0.Core.Services.Interfaces;
 using EF_V0.DataBase.Core;
 using EF_V0.DataBase.Core.Domain;
+using System;
 
 namespace EF_V0.Core.Services
 {
 	public class AuthService : IAuthService
 	{
 		private readonly IUnitOfWork unitOfWork;
+		private readonly ITokenService tokenSrvice;
+		private string refreshToken;
+		private int userClientId;
 
-		public AuthService(IUnitOfWork unitOfWork)
+		public AuthService(IUnitOfWork unitOfWork, ITokenService tokenSrvice)
 		{
 			this.unitOfWork = unitOfWork;
+			this.tokenSrvice = tokenSrvice;
 		}
 
 		public bool Authenticate(LoginUserDto loginUser, ref User user)
@@ -27,7 +32,8 @@ namespace EF_V0.Core.Services
 					userDb = dbUserClient.User;
 					userDb.UserRole = unitOfWork.User.GetRoles(userDb);
 					Mapper.UserMapper(user, userDb);
-					user.RefreshToken = loginUser.RefreshToken;
+					refreshToken = loginUser.RefreshToken;
+					userClientId = dbUserClient.Id;
 					return true;
 				}
 			}
@@ -46,14 +52,51 @@ namespace EF_V0.Core.Services
 			return false;
 		}
 
-		public void Login(Client client, User user, string refreshToken)
+		public AuthTokenDto Login(Client client, User user)
 		{
-			if (user.RefreshToken.Equals(""))
+			if (refreshToken == null)
 			{
-				unitOfWork.UserClient.Login(client, user, refreshToken);
+				refreshToken = tokenSrvice.GenerateRefreshToken(user.PublicId);
+				UserClientDb userClient = new UserClientDb()
+				{
+					RefreshToken = refreshToken,
+					UserId = user.Id,
+					ClientId = client.Id,
+					Platform = client.Platform,
+					Browser = client.Browser,
+					IP = client.IP,
+					CreatedAt = DateTime.Now,
+					UpdatedAt = DateTime.Now
+				};
+				unitOfWork.UserClient.Add(userClient);
+				unitOfWork.Complete();
+				userClientId = userClient.Id;
 			}
 			unitOfWork.User.UpdateLastLogin(user.Id);
-			unitOfWork.Complete();
+			return tokenSrvice.GenerateAuthToken(user, userClientId, refreshToken);
+		}
+
+		public bool Logout(int userClientId, bool all=false)
+		{
+			var ucdb = unitOfWork.UserClient.Get(userClientId);
+			if (ucdb != null && all)
+			{
+				var ucdbs = unitOfWork.UserClient.Find(uc => uc.ClientId == ucdb.ClientId && uc.UserId == ucdb.UserId);
+				unitOfWork.UserClient.RemoveRange(ucdbs);
+				unitOfWork.Complete();
+				return true;
+			}
+			if (ucdb != null)
+			{
+				unitOfWork.UserClient.Remove(ucdb);
+				unitOfWork.Complete();
+				return true;
+			}
+			return false;
 		}
 	}
 }
+
+
+
+

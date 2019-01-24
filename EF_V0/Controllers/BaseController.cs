@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EF_V0.Controllers
 {
-	public class BaseController : Controller
+	public abstract class BaseController : Controller
 	{
+		protected abstract string ErrorCode { get; }
+
 		protected readonly IUnitOfWork unitOfWork;
 		protected readonly IHttpContextAccessor httpContextAccessor;
 
@@ -16,6 +18,14 @@ namespace EF_V0.Controllers
 		{
 			this.unitOfWork = unitOfWork;
 			this.httpContextAccessor = httpContextAccessor;
+		}
+
+		protected int GetUserClientId()
+		{
+			if (int.TryParse(User.FindFirst("aid")?.Value, out int id))
+				return id;
+			else
+				return 0;
 		}
 
 		protected int GetUserId()

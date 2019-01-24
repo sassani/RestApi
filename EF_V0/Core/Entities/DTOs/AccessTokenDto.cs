@@ -11,7 +11,7 @@ namespace EF_V0.Core.Entities.DTOs
 		public int UserId { get; set; }
 
 		[JsonProperty(propertyName: "aid")]
-		public int UserApplicationId { get; set; }
+		public int UserClientId { get; set; }
 
 		[JsonProperty(propertyName: "exp")]
 		public long Expiration { get; set; }
@@ -19,12 +19,10 @@ namespace EF_V0.Core.Entities.DTOs
 		[JsonProperty(propertyName: "roles")]
 		public string[] Roles { get; set; }
 
-		public AccessTokenDto() { }
-
-		public AccessTokenDto(User user, int userApplicationId=1)
+		public AccessTokenDto(User user, int userClientId)
 		{
 			UserId = user.Id;
-			UserApplicationId = userApplicationId;
+			UserClientId = userClientId;
 			Roles = user.Roles.ToArray();
 			Expiration = DateTimeHelper.GetUnixTimestamp(DateTime.Now.AddMinutes(50));
 		}

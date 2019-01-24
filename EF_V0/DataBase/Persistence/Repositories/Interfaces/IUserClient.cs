@@ -6,7 +6,8 @@ namespace EF_V0.DataBase.Persistence.Repositories.Interfaces
 {
 	public interface IUserClient : IRepo<UserClientDb>
 	{
-		void Login(Client client, User user, string refreshToken);
+		//void Login(UserClientDb userClient);
+		//void Logout(UserClientDb userClient);
 		UserClientDb FindByRefreshToken(string refreshToken);
 	}
 }

@@ -12,22 +12,21 @@ namespace EF_V0.Controllers
 {
 	/// <summary>
 	/// </summary>
-	/// <error-code>02</error-code>
+	/// <error-code>01</error-code>
 	[Authorize]
 	[Route("api/auth")]
 	[ApiController]
 	public class AuthController : BaseController
 	{
-		private readonly ITokenService tokenService;
+		protected override string ErrorCode => "01";
+
 		private readonly IAuthService authService;
 		private readonly new IUnitOfWork unitOfWork;
 		private readonly new IHttpContextAccessor httpContextAccessor;
-		private readonly string errorCode = "01";
 
-		public AuthController(IUnitOfWork unitOfWork, ITokenService tokenService, IAuthService authService, IHttpContextAccessor httpContextAccessor) : base(unitOfWork, httpContextAccessor)
+		public AuthController(IUnitOfWork unitOfWork, IAuthService authService, IHttpContextAccessor httpContextAccessor) : base(unitOfWork, httpContextAccessor)
 		{
 			this.unitOfWork = unitOfWork;
-			this.tokenService = tokenService;
 			this.authService = authService;
 			this.httpContextAccessor = httpContextAccessor;
 		}
@@ -39,40 +38,30 @@ namespace EF_V0.Controllers
 		/// <param name="login User Credential"></param>
 		/// <returns></returns>
 		[AllowAnonymous]
-		[HttpPost("login")]
+		[HttpPost()]
 		public IActionResult Login([FromBody] LoginUserDto loginUser)
 		{
+			string errCode = "01";
 			Client client = new Client(unitOfWork, httpContextAccessor);
 			if (!client.IsValid(loginUser))
 			{
 				return new Response(HttpStatusCode.Forbidden,
 						new Error[] { new Error {
-							Code = errorCode+"0101",
+							Code = ErrorCode+errCode+"01",
 							Title = "Invalid Client",
 							Detail = "Client info is incorrect."
 						} }).ToActionResult();
 			}
 
 			User user = new User(unitOfWork);
-			bool authorized = authService.Authenticate(loginUser, ref user);
-			//if (loginUser.GrantType.ToLower().Equals("refreshtoken"))
-			//{
-			//	authorized = user.Authenticate(loginUser.RefreshToken);
-
-			//}
-			//else if (loginUser.GrantType.ToLower().Equals("idtoken"))
-			//{
-			//	authorized = user.Authenticate(loginUser);
-			//}
-
-			if (authorized)
+			if (authService.Authenticate(loginUser, ref user))
 			{
 				// check user
 				if (!user.IsActive)
 				{
 					return new Response(HttpStatusCode.Forbidden,
 						new Error[] { new Error {
-							Code = errorCode+"0104",
+							Code = ErrorCode+errCode+"04",
 							Detail = "Your account is suspended"
 						} }).ToActionResult();
 				}
@@ -81,17 +70,14 @@ namespace EF_V0.Controllers
 				{
 					return new Response(HttpStatusCode.Forbidden,
 						new Error[] { new Error {
-							Code = errorCode+"0105",
+							Code = ErrorCode+errCode+"05",
 							Detail = "Your email is not verified"
 						} }).ToActionResult();
 				}
 
-				// get token
-				AuthTokenDto token = tokenService.GenerateAuthToken(user);
-				authService.Login(client, user, token.RefreshToken);
 				var payload = new
 				{
-					authToken = token
+					authToken = authService.Login(client, user)
 				};
 				return new Response(HttpStatusCode.Accepted, payload).ToActionResult();
 			}
@@ -101,25 +87,52 @@ namespace EF_V0.Controllers
 				{
 					return new Response(HttpStatusCode.Forbidden,
 					new Error[] { new Error {
-						Code = errorCode+"0102",
+						Code = ErrorCode+errCode+"02",
 						Detail = "Refresh token is incorrect or expired."
 					} }).ToActionResult();
 				}
 				return new Response(HttpStatusCode.Forbidden,
 					new Error[] { new Error {
-						Code = errorCode+"0103",
+						Code = ErrorCode+errCode+"03",
 						Detail = "Email or password is incorrect."
 					} }).ToActionResult();
 			}
 
 		}
 
-		[AllowAnonymous]
-		[HttpGet("test")]
-		public IActionResult Test()
+		[HttpDelete()]
+		public IActionResult Logout()
 		{
-			var user = GetUser();
-			return new Response(HttpStatusCode.Accepted, user).ToActionResult();
+			string errCode = "02";
+			if (authService.Logout(GetUserClientId()))
+			{
+
+				return new Response(HttpStatusCode.Accepted, null).ToActionResult();
+			}
+
+			return new Response(HttpStatusCode.BadGateway,
+						new Error[] { new Error {
+							Code = ErrorCode+errCode+"01",
+							Title = "Invalid data.",
+							Detail = "Maybe you have signed out before!"
+						} }).ToActionResult();
+		}
+
+		[HttpDelete("all")]
+		public IActionResult LogoutAll()
+		{
+			string errCode = "03";
+			if (authService.Logout(GetUserClientId(), true))
+			{
+				return new Response(HttpStatusCode.Accepted, null).ToActionResult();
+			}
+
+			return new Response(HttpStatusCode.BadGateway,
+						new Error[] { new Error {
+							Code = ErrorCode+errCode+"01",
+							Title = "Invalid data.",
+							Detail = "Maybe you have signed out before!"
+						} }).ToActionResult();
 		}
 	}
 }
