@@ -18,17 +18,17 @@ namespace EF_V0.Controllers
 	[ApiController]
 	public class AuthController : BaseController
 	{
-		protected override string ErrorCode => "01";
+		
 
 		private readonly IAuthService authService;
-		private readonly new IUnitOfWork unitOfWork;
-		private readonly new IHttpContextAccessor httpContextAccessor;
+		private readonly IClientService clientService;
 
-		public AuthController(IUnitOfWork unitOfWork, IAuthService authService, IHttpContextAccessor httpContextAccessor) : base(unitOfWork, httpContextAccessor)
+
+		public AuthController(IUserService userSrvice, IClientService clientService, IAuthService authService) : base(userSrvice)
 		{
-			this.unitOfWork = unitOfWork;
+			ErrorCode = "01";
 			this.authService = authService;
-			this.httpContextAccessor = httpContextAccessor;
+			this.clientService = clientService;
 		}
 
 
@@ -42,8 +42,9 @@ namespace EF_V0.Controllers
 		public IActionResult Login([FromBody] LoginUserDto loginUser)
 		{
 			string errCode = "01";
-			Client client = new Client(unitOfWork, httpContextAccessor);
-			if (!client.IsValid(loginUser))
+			Client client = clientService.CreateClient(loginUser);
+
+			if (!client.IsValid)
 			{
 				return new Response(HttpStatusCode.Forbidden,
 						new Error[] { new Error {
@@ -53,7 +54,7 @@ namespace EF_V0.Controllers
 						} }).ToActionResult();
 			}
 
-			User user = new User(unitOfWork);
+			User user = new User();
 			if (authService.Authenticate(loginUser, ref user))
 			{
 				// check user

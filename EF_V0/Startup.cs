@@ -36,8 +36,10 @@ namespace EF_V0
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 			services.AddHttpContextAccessor();
 
-
+			
 			services.AddTransient<ITokenService, TokenService>();
+			services.AddTransient<IClientService, ClientService>();
+			services.AddTransient<IUserService, UserService>();
 			services.AddTransient<IAuthService, AuthService>();
 		}
 

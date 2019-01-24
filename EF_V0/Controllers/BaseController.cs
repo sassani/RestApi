@@ -1,23 +1,20 @@
 ﻿
 using EF_V0.Controllers.Responses;
 using EF_V0.Core.Entities;
-using EF_V0.DataBase.Core;
-using Microsoft.AspNetCore.Http;
+using EF_V0.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EF_V0.Controllers
 {
-	public abstract class BaseController : Controller
+	public class BaseController : Controller
 	{
-		protected abstract string ErrorCode { get; }
+		protected string ErrorCode { get; set; }
 
-		protected readonly IUnitOfWork unitOfWork;
-		protected readonly IHttpContextAccessor httpContextAccessor;
+		protected readonly IUserService userSrvice;
 
-		protected BaseController(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+		protected BaseController(IUserService userSrvice)
 		{
-			this.unitOfWork = unitOfWork;
-			this.httpContextAccessor = httpContextAccessor;
+			this.userSrvice = userSrvice;
 		}
 
 		protected int GetUserClientId()
@@ -38,9 +35,7 @@ namespace EF_V0.Controllers
 
 		protected User GetUser()
 		{
-			User user = new User(unitOfWork);
-			user.GetUser(GetUserId());
-			return user;
+			return userSrvice.Get(GetUserId());
 		}
 
 		protected IActionResult MakeResponse(System.Net.HttpStatusCode statusCode, object payload = null)
