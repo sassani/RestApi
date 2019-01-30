@@ -26,11 +26,11 @@ namespace EF_V0
 			services.AddOptions();
 
 			var appSettingSection = Configuration.GetSection("AppSettings");
-			services.Configure<AppSettings>(appSettingSection);
-			AppSettings appSettings = appSettingSection.Get<AppSettings>();
-			
+			services.Configure<AppSettingsModel>(appSettingSection);
+			AppSettingsModel appSettings = appSettingSection.Get<AppSettingsModel>();
 
-			services.ConfigureDb(appSettings);
+
+			services.ConfigureDbMySql(appSettings);
 			services.ConfigureCors(appSettings);
 			services.ConfigureAuthentication(appSettings);
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);

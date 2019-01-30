@@ -1,13 +1,10 @@
-﻿using EF_V0.DataBase.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace EF_V0.Core.Entities
 {
 	public class User
 	{
-		private readonly IUnitOfWork unitOfWork;
-
 		public int Id { get; set; }
 		public string PublicId { get; set; }
 		public string FirstName { get; set; }

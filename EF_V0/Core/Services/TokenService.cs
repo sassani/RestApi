@@ -1,6 +1,6 @@
 ﻿using EF_V0.Core.Entities;
 using EF_V0.Core.Entities.DTOs;
-using EF_V0.Core.Helpers;
+using EF_V0.Helpers;
 using EF_V0.Core.Services.Interfaces;
 using EF_V0.Extensions;
 using Jose;
@@ -11,9 +11,9 @@ namespace EF_V0.Core.Services
 {
 	public class TokenService : ITokenService
 	{
-		private readonly IOptions<AppSettings> config;
+		private readonly IOptions<AppSettingsModel> config;
 		private readonly byte[] secretKey;
-		public TokenService(IOptions<AppSettings> config)
+		public TokenService(IOptions<AppSettingsModel> config)
 		{
 			this.config = config;
 			secretKey = config.Value.Token.SecretKey.Select(x => (byte)x).ToArray();

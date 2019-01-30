@@ -11,16 +11,29 @@ namespace EF_V0.Extensions
 {
 	public static class ServiceExtensions
 	{
-		public static void ConfigureDb(this IServiceCollection services, AppSettings config)
+		//public static void ConfigureDb(this IServiceCollection services, AppSettings config)
+		//{
+
+		//	services.AddDbContext<ApiContext>(options => options
+		//	///.UseLazyLoadingProxies()
+		//	.UseSqlServer(config.DbConnection));
+		//	services.AddScoped<IUnitOfWork, UnitOfWork>();
+		//}
+
+		public static void ConfigureDbMySql(this IServiceCollection services, AppSettingsModel config)
 		{
 
+			var server = config.DbConfiguration.Server;
+			var db = config.DbConfiguration.Database;
+			var port = config.DbConfiguration.Port;
+			var password = config.DbConfiguration.Password;
 			services.AddDbContext<ApiContext>(options => options
 			///.UseLazyLoadingProxies()
-			.UseSqlServer(config.DbConnection));
+			.UseMySQL($"Server={server}; port={port}; Database={db}; uid=root; password={password};"));
 			services.AddScoped<IUnitOfWork, UnitOfWork>();
 		}
 
-		public static void ConfigureCors(this IServiceCollection services, AppSettings config)
+		public static void ConfigureCors(this IServiceCollection services, AppSettingsModel config)
 		{
 			services.AddCors(options =>
 			{
@@ -34,7 +47,7 @@ namespace EF_V0.Extensions
 			});
 		}
 
-		public static void ConfigureAuthentication(this IServiceCollection services, AppSettings config)
+		public static void ConfigureAuthentication(this IServiceCollection services, AppSettingsModel config)
 		{
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			.AddJwtBearer(opt =>

@@ -1,5 +1,5 @@
 ﻿using EF_V0.Core.Entities;
-using EF_V0.Core.Helpers;
+using EF_V0.Helpers;
 using EF_V0.Core.Services.Interfaces;
 using EF_V0.DataBase.Core;
 using EF_V0.DataBase.Core.Domain;

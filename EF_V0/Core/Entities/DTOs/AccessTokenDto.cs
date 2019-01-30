@@ -1,4 +1,4 @@
-﻿using EF_V0.Core.Helpers;
+﻿using EF_V0.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Linq;

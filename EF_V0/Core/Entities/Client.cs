@@ -1,5 +1,5 @@
 ﻿using EF_V0.Core.Entities.DTOs;
-using EF_V0.Core.Helpers;
+using EF_V0.Helpers;
 using EF_V0.DataBase.Core;
 using Microsoft.AspNetCore.Http;
 using UAParser;
